@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>입장 명단 확인</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+      font-size: 14px;
+    }
+
+    img.banner {
+      width: 100%;
+      height: auto;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+
+    .description {
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+      line-height: 1.5;
+      color: #333;
+    }
+
+    input {
+      margin: 5px 0;
+      padding: 10px;
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 0.9rem;
+    }
+
+    button {
+      padding: 10px;
+      width: 100%;
+      background-color: #333;
+      color: white;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: none;
+      transition: background-color 0.3s;
+    }
+
+    button:disabled {
+      background-color: #aaa;
+      cursor: wait;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 480px) {
+      h2 {
+        font-size: 1.3rem;
+      }
+
+      .description {
+        font-size: 0.8rem;
+      }
+
+      input, button {
+        font-size: 0.85rem;
+      }
+
+      #result {
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <img src="world-of-hq-banner.png" alt="World of HQ Banner" class="banner">
+
+  <h2>세계여, 하이큐를 하자! 입장 명단 확인</h2>
+  <div class="description">
+    이름과 연락처 뒷자리(4자리)를 작성 후 <strong>'확인'</strong> 버튼을 누르시면 입장 확인 여부를 확인할 수 있습니다.<br>
+    해당 프로그램에서 명단 확인이 어려우신 경우, 행사 메일 (<a href="mailto:world.of.hq@gmail.com">world.of.hq@gmail.com</a>)으로 연락 주시면 빠르게 확인 후 조치하겠습니다.
+  </div>
+
+  <input type="text" id="name" placeholder="이름">
+  <input type="text" id="phone" placeholder="연락처 뒷번호 (예: 1234)">
+  <button id="checkBtn" onclick="checkEntry()">확인</button>
+  <div id="result"></div>
+
+  <script>
+    async function checkEntry() {
+      const name = document.getElementById('name').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const resultDiv = document.getElementById('result');
+      const button = document.getElementById('checkBtn');
+
+      if (!name || !phone) {
+        resultDiv.textContent = '이름과 연락처 뒷번호를 모두 입력해주세요.';
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = '확인 중...';
+
+      try {
+        const response = await fetch("https://script.google.com/macros/s/AKfycbyYBWHMOizVZXgYrFlqRkTuLt5Pp44eZ5yvZYenfSYlZoyR4lb08CCL20vLG4vOSB9x9g/exec", {
+          method: "POST",
+          body: new URLSearchParams({ name, phone })
+        });
+
+        const data = await response.json();
+        if (data.result === "입장 가능") {
+          resultDiv.textContent = `✅ 입장 가능: ${data.name}님 (${data.info})`;
+          resultDiv.style.color = "green";
+        } else {
+          resultDiv.textContent = "❌ 명단에 없습니다.";
+          resultDiv.style.color = "red";
+        }
+      } catch (error) {
+        resultDiv.textContent = "⚠️ 네트워크 오류가 발생했습니다.";
+        resultDiv.style.color = "orange";
+      } finally {
+        button.disabled = false;
+        button.textContent = '확인';
+      }
+    }
+  </script>
+</body>
+</html>
